@@ -119,12 +119,6 @@ npm run build
 
 ---
 
-## 📄 License
-
-MIT License
-
----
-
 ## 👨‍💻 Author
 
 **Yogesh Saini**

@@ -1,23 +1,22 @@
-.app-container {
+.app-shell {
   display: flex;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-.sidebar {
-  width: 270px;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  background-color: #343a40;
-  color: white;
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  margin-left: 270px;
+.app-content {
   flex-grow: 1;
-  display: flex;
+  min-width: 0;
+  margin-left: 0;
+  padding: 56px 0 0 0;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .app-content {
+    margin-left: var(--sidebar-width);
+    padding-top: 0;
+  }
 }

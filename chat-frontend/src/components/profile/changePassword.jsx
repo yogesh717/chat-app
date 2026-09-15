@@ -66,12 +66,12 @@ const ChangePassword = () => {
     
 
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#043A7A" }}>
-            <div className="card shadow-lg w-50 rounded-4 overflow-hidden" style={{ marginLeft: "270px" }}>
+        <div className="d-flex justify-content-center align-items-center min-vh-100 p-3" style={{ backgroundColor: "var(--color-primary-dark)" }}>
+            <div className="card shadow-lg rounded-4 overflow-hidden w-100" style={{ maxWidth: "600px" }}>
                 <div className="row g-0">
 
                     {/* Sidebar Section */}
-                    <div className="col-md-4 text-white d-flex flex-column justify-content-center align-items-center p-4" style={{ backgroundColor: "#0092F0" }}>
+                    <div className="col-md-4 text-white d-flex flex-column justify-content-center align-items-center p-4" style={{ backgroundColor: "var(--color-primary)" }}>
                         <h2 className="fw-bold">GENESIS</h2>
                         <p className="mt-2 text-center">Update your profile with ease</p>
                     </div>

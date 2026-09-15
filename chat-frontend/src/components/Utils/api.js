@@ -58,20 +58,129 @@ const fetchUsersApi = async (url) => {
 };
 
 
-const sendMessageApi = async (receiverId, newMessage) => {
+const getConversationsApi = async () => {
+    const token = localStorage.getItem("token");
+    const requestOptions = {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    };
+
+    try {
+        const response = await fetch(constant.conversationsUrl, requestOptions);
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching conversations:", error);
+        return [];
+    }
+};
+
+const markConversationReadApi = async (userId) => {
+    const token = localStorage.getItem("token");
+    const requestOptions = {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    };
+
+    try {
+        const response = await fetch(constant.markReadUrl.replace(':id', userId), requestOptions);
+        return await response.json();
+    } catch (error) {
+        console.error("Error marking conversation as read:", error);
+        return { success: false, error };
+    }
+};
+
+const jsonAuthRequest = async (url, method, body) => {
+    const token = localStorage.getItem("token");
+    const requestOptions = {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    };
+    try {
+        const response = await fetch(url, requestOptions);
+        return await response.json();
+    } catch (error) {
+        console.error(`Error calling ${method} ${url}:`, error);
+        return { success: false, error };
+    }
+};
+
+const editMessageApi = (messageId, message) =>
+    jsonAuthRequest(constant.editMessageUrl.replace(':id', messageId), 'PUT', { message });
+
+const deleteMessageApi = (messageId, forEveryone) =>
+    jsonAuthRequest(constant.deleteMessageUrl.replace(':id', messageId), 'DELETE', { forEveryone });
+
+const forwardMessageApi = (messageId, receiverIds) =>
+    jsonAuthRequest(constant.forwardMessageUrl.replace(':id', messageId), 'POST', { receiverIds });
+
+const reactToMessageApi = (messageId, emoji) =>
+    jsonAuthRequest(constant.reactMessageUrl.replace(':id', messageId), 'POST', { emoji });
+
+const pinMessageApi = (messageId) =>
+    jsonAuthRequest(constant.pinMessageUrl.replace(':id', messageId), 'PUT');
+
+const unpinMessageApi = (messageId) =>
+    jsonAuthRequest(constant.unpinMessageUrl.replace(':id', messageId), 'PUT');
+
+const starMessageApi = (messageId) =>
+    jsonAuthRequest(constant.starMessageUrl.replace(':id', messageId), 'PUT');
+
+const unstarMessageApi = (messageId) =>
+    jsonAuthRequest(constant.unstarMessageUrl.replace(':id', messageId), 'PUT');
+
+const getStarredMessagesApi = async () => {
+    const token = localStorage.getItem("token");
+    try {
+        const response = await fetch(constant.starredMessagesUrl, {
+            method: 'GET',
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching starred messages:", error);
+        return [];
+    }
+};
+
+
+const sendMessageApi = async (receiverId, newMessage, { replyTo, attachmentFile } = {}) => {
 
     const token = localStorage.getItem("token");
 
     const url = constant.sendMessageUrl.replace(":id", receiverId);
 
-    const requestOptions = {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ message: newMessage })
-    };
+    let requestOptions;
+    if (attachmentFile) {
+        const formData = new FormData();
+        formData.append("message", newMessage || "");
+        if (replyTo) formData.append("replyTo", replyTo);
+        formData.append("attachment", attachmentFile);
+        requestOptions = {
+            method: 'POST',
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData,
+        };
+    } else {
+        requestOptions = {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ message: newMessage, ...(replyTo ? { replyTo } : {}) })
+        };
+    }
 
     try {
         const response = await fetch(url, requestOptions);
@@ -125,6 +234,7 @@ const editProfileApi = async (userId, updatedData) => {
     formData.append("userName", updatedData.userName);
     formData.append("email", updatedData.email);
     formData.append("gender", updatedData.gender);
+    formData.append("bio", updatedData.bio || "");
 
     //  Only if file is selected
     if (updatedData.profileImage instanceof File) {
@@ -272,6 +382,44 @@ const resetPasswordApi = async (url, data) => {
 
 
 
+const getCurrentUserApi = async () => {
+    const token = localStorage.getItem("token");
+    const requestOptions = {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    };
+
+    try {
+        const response = await fetch(constant.meApiUrl, requestOptions);
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching current user:", error);
+        return { success: false, message: "Error fetching current user", error };
+    }
+};
+
+const deactivateAccountApi = async () => {
+    const token = localStorage.getItem("token");
+    const requestOptions = {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    };
+
+    try {
+        const response = await fetch(constant.deactivateAccountUrl, requestOptions);
+        return await response.json();
+    } catch (error) {
+        console.error("Error deactivating account:", error);
+        return { success: false, message: "Error deactivating account", error };
+    }
+};
+
 export {
     signupApi,
     loginApi,
@@ -283,5 +431,18 @@ export {
     checkCredentialsApi,
     verifyOtpApi,
     resetPasswordApi,
+    getCurrentUserApi,
+    deactivateAccountApi,
+    getConversationsApi,
+    markConversationReadApi,
+    editMessageApi,
+    deleteMessageApi,
+    forwardMessageApi,
+    reactToMessageApi,
+    pinMessageApi,
+    unpinMessageApi,
+    starMessageApi,
+    unstarMessageApi,
+    getStarredMessagesApi,
 
 };

@@ -5,10 +5,10 @@ import { FaUsers, FaEnvelope, FaUserCheck } from "react-icons/fa";
 const Dashboard = () => {
     return (
         <div className="container-fluid">
-            <div className="row" style={{ marginLeft: "270px" }}>
+            <div className="row">
 
                 {/* Main Content */}
-                <main className="col-md-9 col-lg-10 p-4">
+                <main className="col-12 p-4">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h2 className="fw-bold">📊 Dashboard</h2>
                     </div>

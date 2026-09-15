@@ -37,6 +37,11 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Email already exists." });
         }
 
+        const existingUserName = await User.findOne({ userName });
+        if (existingUserName) {
+            return res.status(400).json({ message: "Username already exists." });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Gender-based default profile image
@@ -73,12 +78,22 @@ export const signup = async (req, res) => {
 
         await user.save();
 
-        const token = jwt.sign({ userEmail: user.email }, JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
         res.status(201).json({
             message: "User registered successfully",
             success: true,
-            token
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullName: user.fullName,
+                userName: user.userName,
+                gender: user.gender,
+                profileImage: user.profileImage,
+                bio: user.bio,
+                isActive: user.isActive,
+            },
         });
     } catch (error) {
         console.error(error);
@@ -108,6 +123,10 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password (Wrong password)" });
         }
 
+        if (!user.isActive) {
+            return res.status(403).json({ message: "This account has been deactivated." });
+        }
+
         const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
         res.status(200)
@@ -120,7 +139,11 @@ export const login = async (req, res) => {
                     email: user.email,
                     fullName: user.fullName,
                     userName: user.userName,
-                    gender: user.gender
+                    gender: user.gender,
+                    profileImage: user.profileImage,
+                    bio: user.bio,
+                    isActive: user.isActive,
+                    lastSeen: user.lastSeen,
                 }
             });
 
@@ -145,6 +168,38 @@ export const logout = async (req, res) => {
 
 
 
+export const deactivateAccount = async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.id, { isActive: false }, { new: true });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.status(200)
+            .cookie("token", "", { maxAge: 0, httpOnly: true })
+            .json({ success: true, message: "Account deactivated" });
+    } catch (error) {
+        console.error("Error deactivating account:", error);
+        res.status(500).json({ success: false, message: "Error deactivating account" });
+    }
+};
+
+
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.id).select("-password -otp -otpExpires");
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error("Error fetching current user:", error);
+        res.status(500).json({ success: false, message: "Error fetching current user" });
+    }
+};
+
+
+
 export const fetchAll = async (req, res) => {
     try {
         const loggedInUserId = req.id;
@@ -163,11 +218,11 @@ export const updateProfile = async (req, res) => {
     const userId = req.params.id;
     console.log("User ID:", req.params.id);
 
-    const { fullName, userName, email, gender } = req.body;
+    const { fullName, userName, email, gender, bio } = req.body;
     console.log("REQ BODY:", req.body);
-   
+
     try {
-        let updatedData = { fullName, userName, email, gender };
+        let updatedData = { fullName, userName, email, gender, bio };
 
         // Profile image agar upload hui ho to usko update karein
         if (req.file) {

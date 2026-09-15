@@ -1,19 +1,20 @@
 /* Full-page container */
 .login-container {
-  background-color: #043A7A;
- 
+  background-color: var(--color-primary-dark);
+  padding: 16px;
 }
 
 /* Login Card */
 .login-card {
   display: flex;
-  width: 800px;
-  height: 450px;
-  border: solid #043977 1px;
-  background: white;
-  border-radius: 10px;
+  width: 100%;
+  max-width: 800px;
+  min-height: 450px;
+  border: none;
+  background: var(--color-surface);
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 /* Left Side - Image */
@@ -49,7 +50,7 @@
 }
 /* Style for HELLO text */
 .hello-text {
-  color: rgb(4, 57, 119);
+  color: var(--color-primary-dark);
   font-weight: bold;
   font-size: 28px;
   text-align: left;  /* Align to the left */
@@ -63,14 +64,14 @@
   display: block;
   width: 50px;
   height: 3px;
-  background-color: rgb(4, 57, 119);
+  background-color: var(--color-primary-dark);
   margin-top: 5px;
   border-radius: 2px;
 }
 
 /* Button */
 .btn-login {
-  background: linear-gradient(to right, #007bff, #0056b3) !important;
+  background: var(--color-primary) !important;
   border: none;
   font-weight: bold;
   padding: 12px;

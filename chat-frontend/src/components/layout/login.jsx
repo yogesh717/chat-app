@@ -20,6 +20,7 @@ const Login = () => {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [errors, setErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
+    const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
 
     useEffect(() => {
@@ -62,6 +63,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setAttemptedSubmit(true);
         if (!isFormValid) return;
     
         try {
@@ -104,22 +106,24 @@ const Login = () => {
                                     <input
                                         type="email"
                                         name="email"
-                                        className="form-control"
+                                        className={`form-control ${attemptedSubmit && errors.email ? "is-invalid" : ""}`}
                                         placeholder="Enter your email"
                                         value={formData.email}
                                         onChange={handleChange}
                                     />
+                                    {attemptedSubmit && errors.email && <div className="invalid-feedback">{errors.email}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">Password</label>
                                     <input
                                         type="password"
                                         name="password"
-                                        className="form-control"
+                                        className={`form-control ${attemptedSubmit && errors.password ? "is-invalid" : ""}`}
                                         placeholder="Enter your password"
                                         value={formData.password}
                                         onChange={handleChange}
                                     />
+                                    {attemptedSubmit && errors.password && <div className="invalid-feedback">{errors.password}</div>}
                                 </div>
                                 <button type="submit" className="btn btn-primary  w-100">
                                     NEXT →

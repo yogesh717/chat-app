@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { editProfileApi } from "../Utils/api";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import { useAuth } from "../../context/AuthContext"; 
 import { useSelector, useDispatch } from "react-redux";
-import { login } from "../../redux/slices/authSlice.js";
+import { updateUser } from "../../redux/slices/authSlice.js";
 
 const UpdateProfile = () => {
     const navigate = useNavigate();
-    // const { user, userId, login } = useAuth();
 
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
@@ -19,23 +17,57 @@ const UpdateProfile = () => {
         userName: "",
         email: "",
         gender: "",
+        bio: "",
         profileImage: null,
     });
     const [previewImage, setPreviewImage] = useState(null);
-    
+    const [errors, setErrors] = useState({});
+    const [isFormValid, setIsFormValid] = useState(true);
+    const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+
     useEffect(() => {
         if (user) {
-            setUserData({
+            setUserData((prev) => ({
+                ...prev,
                 fullName: user.fullName || "",
                 userName: user.userName || "",
                 email: user.email || "",
                 gender: user.gender || "",
-            });
+                bio: user.bio || "",
+            }));
             if (user.profileImage) {
                 setPreviewImage(user.profileImage);
             }
         }
     }, [user]);
+
+    const validateForm = useCallback(() => {
+        let newErrors = {};
+        let isValid = true;
+
+        if (!userData.fullName.trim()) {
+            newErrors.fullName = "Full Name is required";
+            isValid = false;
+        }
+        if (!userData.userName.trim()) {
+            newErrors.userName = "Username is required";
+            isValid = false;
+        }
+        if (!userData.email.trim()) {
+            newErrors.email = "Email is required";
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+            newErrors.email = "Enter a valid email address";
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        setIsFormValid(isValid);
+    }, [userData]);
+
+    useEffect(() => {
+        validateForm();
+    }, [userData, validateForm]);
 
     const handleChange = (e) => {
         setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -51,43 +83,33 @@ const UpdateProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        setAttemptedSubmit(true);
+
         if (!userId) {
             alert("User ID not found. Please login again.");
             return;
         }
+        if (!isFormValid) return;
 
-        // const formData = new FormData();
-        // formData.append("fullName", userData.fullName);
-        // formData.append("userName", userData.userName);
-        // formData.append("email", userData.email);
-        // formData.append("gender", userData.gender);
-        // if (userData.profileImage) {
-        //     formData.append("profileImage", userData.profileImage);
-        // }
-    
-        // const response = await editProfileApi(userId, formData);
         const response = await editProfileApi(userId, userData);
-    
+
         if (response.success) {
             alert("Profile Updated Successfully!");
-            dispatch(login({ token: localStorage.getItem("token"), user: response.user }));
-            // login(localStorage.getItem("token"), response.user);
-            // localStorage.setItem("user", JSON.stringify(response.user)); 
-            navigate("/update-profile");
+            dispatch(updateUser(response.user));
+            navigate("/profile-page");
         } else {
-            alert("Error updating profile");
+            alert(response.message || "Error updating profile");
         }
     };
-    
+
 
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#043A7A" }}>
-            <div className="card shadow-lg w-50 rounded-4 overflow-hidden"  style={{ marginLeft: "270px" }}>
+        <div className="d-flex justify-content-center align-items-center min-vh-100 p-3" style={{ backgroundColor: "var(--color-primary-dark)" }}>
+            <div className="card shadow-lg rounded-4 overflow-hidden w-100" style={{ maxWidth: "700px" }}>
                 <div className="row g-0">
-                    
+
                     {/* Sidebar Section */}
-                    <div className="col-md-4 text-white d-flex flex-column justify-content-center align-items-center p-4" style={{ backgroundColor: "#0092F0" }}>
+                    <div className="col-md-4 text-white d-flex flex-column justify-content-center align-items-center p-4" style={{ backgroundColor: "var(--color-primary)" }}>
                         <h2 className="fw-bold">GENESIS</h2>
                         <p className="mt-2 text-center">Update your profile with ease</p>
                     </div>
@@ -122,37 +144,40 @@ const UpdateProfile = () => {
                                 <div className="col">
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${attemptedSubmit && errors.fullName ? "is-invalid" : ""}`}
                                         placeholder="Full Name"
                                         name="fullName"
                                         value={userData.fullName}
                                         onChange={handleChange}
                                         required
                                     />
+                                    {attemptedSubmit && errors.fullName && <div className="invalid-feedback">{errors.fullName}</div>}
                                 </div>
                                 <div className="col">
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${attemptedSubmit && errors.userName ? "is-invalid" : ""}`}
                                         placeholder="User Name"
                                         name="userName"
                                         value={userData.userName}
                                         onChange={handleChange}
                                         required
                                     />
+                                    {attemptedSubmit && errors.userName && <div className="invalid-feedback">{errors.userName}</div>}
                                 </div>
                             </div>
 
                             <div className="mb-3">
                                 <input
                                     type="email"
-                                    className="form-control"
+                                    className={`form-control ${attemptedSubmit && errors.email ? "is-invalid" : ""}`}
                                     placeholder="Email"
                                     name="email"
                                     value={userData.email}
                                     onChange={handleChange}
                                     required
                                 />
+                                {attemptedSubmit && errors.email && <div className="invalid-feedback">{errors.email}</div>}
                             </div>
 
                             <div className="mb-3">
@@ -168,6 +193,17 @@ const UpdateProfile = () => {
                                     <option value="Female">Female</option>
                                     <option value="Other">Other</option>
                                 </select>
+                            </div>
+
+                            <div className="mb-3">
+                                <textarea
+                                    className="form-control"
+                                    placeholder="Bio"
+                                    name="bio"
+                                    rows={3}
+                                    value={userData.bio}
+                                    onChange={handleChange}
+                                />
                             </div>
 
                             <button type="submit" className="btn btn-primary w-100 rounded-pill mb-3">

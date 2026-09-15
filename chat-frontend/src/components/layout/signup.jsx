@@ -11,6 +11,11 @@ import { login } from "../../redux/slices/authSlice";
 import "./signup.css";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 
+const DEFAULT_AVATAR =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><circle cx="50" cy="38" r="20" fill="#999"/><ellipse cx="50" cy="90" rx="32" ry="26" fill="#999"/></svg>'
+  );
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -31,6 +36,7 @@ const Signup = () => {
 
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
 
 
@@ -119,6 +125,7 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setAttemptedSubmit(true);
     if (!isFormValid) return;
 
     // setIsLoading(true);
@@ -157,10 +164,10 @@ const Signup = () => {
 
 
 return (
-  <Container fluid className="d-flex align-items-center justify-content-center" style={{ background: "linear-gradient(to right, #043A7A, #021B4A)" }}>
-    <Row className="w-75 shadow-lg rounded overflow-hidden" style={{ marginTop: "53px", marginBottom: "50px" }}>
+  <Container fluid className="d-flex align-items-center justify-content-center p-3" style={{ background: "linear-gradient(to right, var(--color-primary-dark), #021B4A)", minHeight: "100vh" }}>
+    <Row className="w-100 shadow-lg rounded overflow-hidden" style={{ maxWidth: "900px", marginTop: "24px", marginBottom: "24px" }}>
       {/* Left Section */}
-      <Col md={5} className="text-white d-flex flex-column align-items-center justify-content-center p-4" style={{ background: "linear-gradient(to bottom, #043A7A, #021B4A)" }}>
+      <Col md={5} className="text-white d-flex flex-column align-items-center justify-content-center p-4" style={{ background: "linear-gradient(to bottom, var(--color-primary-dark), #021B4A)" }}>
         <h2 className="fw-bold">GENESIS</h2>
         <p className="mt-3">New User Registration.</p>
         <p>
@@ -181,10 +188,15 @@ return (
             alt="Avatar"
             className="avatar-preview mb-2"
             style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = DEFAULT_AVATAR;
+            }}
           />
           <div className="mb-2">
             <label className="form-label">Username</label>
             <input type="text" className="form-control text-center" name="userName" value={formData.userName} onChange={handleChange} required />
+            {attemptedSubmit && errors.userName && <div className="text-danger small mt-1">{errors.userName}</div>}
           </div>
           <p className="mb-3">Select your gender:</p>
           <div className="d-flex justify-content-center">
@@ -202,7 +214,8 @@ return (
           {/* <Row>
               <Col md={6}> */}
           <Form.Group className="mb-3">
-            <Form.Control type="text" placeholder="Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
+            <Form.Control type="text" placeholder="Name" name="fullName" value={formData.fullName} onChange={handleChange} isInvalid={attemptedSubmit && !!errors.fullName} required />
+            <Form.Control.Feedback type="invalid">{errors.fullName}</Form.Control.Feedback>
           </Form.Group>
           {/* </Col>
               <Col md={6}>
@@ -213,18 +226,21 @@ return (
             </Row> */}
 
           <Form.Group className="mb-3">
-            <Form.Control type="email" placeholder="Email" name="email" value={formData.email} onChange={handleChange} required />
+            <Form.Control type="email" placeholder="Email" name="email" value={formData.email} onChange={handleChange} isInvalid={attemptedSubmit && !!errors.email} required />
+            <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
           </Form.Group>
 
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Control type="password" placeholder="Password" name="password" value={formData.password} onChange={handleChange} required />
+                <Form.Control type="password" placeholder="Password" name="password" value={formData.password} onChange={handleChange} isInvalid={attemptedSubmit && !!errors.password} required />
+                <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Control type="password" placeholder="Repeat" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+                <Form.Control type="password" placeholder="Repeat" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} isInvalid={attemptedSubmit && !!errors.confirmPassword} required />
+                <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>

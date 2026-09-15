@@ -121,19 +121,18 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg" style={{ width: "800px" }}>
+        <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light p-3">
+            <div className="card shadow-lg w-100" style={{ maxWidth: "800px" }}>
                 <div className="row g-0">
-                    
+
                     {/* Left Side - Image/Text */}
-                    <div className="col-md-6 d-flex align-items-center justify-content-center text-white text-center p-4" style={{ 
-                        background: "linear-gradient(to right, #007bff, #6610f2)",
-                        borderRadius: "10px 0 0 10px"
+                    <div className="col-md-6 d-flex align-items-center justify-content-center text-white text-center p-4" style={{
+                        background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
+                        borderRadius: "10px 10px 0 0"
                     }}>
                         <div>
                             <h2 className="fw-bold">Reset Your Password</h2>
-                            <p>Enter your email to receive an OTP and reset your password.</p>
-                            <img src="https://source.unsplash.com/300x200/?technology,security" className="img-fluid rounded shadow" alt="Reset Password" />
+                            <p className="mb-0">Enter your email to receive an OTP and reset your password.</p>
                         </div>
                     </div>
 

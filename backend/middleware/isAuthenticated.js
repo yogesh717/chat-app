@@ -1,7 +1,8 @@
 import  jwt  from "jsonwebtoken";
+import User from "../models/user.js";
 
 
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -12,8 +13,13 @@ const isAuthenticated = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-     req.id = decoded.userId;
+
+    const user = await User.findById(decoded.userId).select("isActive");
+    if (!user || !user.isActive) {
+      return res.status(403).json({ message: "Account is deactivated or no longer exists" });
+    }
+
+    req.id = decoded.userId;
     next();
   } catch (error) {
     return res.status(403).json({ message: "Invalid or expired token" });

@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -13,8 +11,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
   },
-  
-    otp: { type: String }, 
+    bio: { type: String, default: "" },
+    isActive: { type: Boolean, default: true },
+    lastSeen: { type: Date, default: null },
+    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
+
+    otp: { type: String },
     otpExpires: { type: Date },
   },
   { timestamps: true }
